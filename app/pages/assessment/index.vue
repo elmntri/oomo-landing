@@ -1,1 +1,176 @@
-<template></template>
+<template>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Progress Header -->
+        <div class="border-b bg-white border-gray-200 px-6 py-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-600">
+                        Question {{ assessmentStore.currentQuestion + 1 }} of {{ assessmentStore.getTotalQuestions }}
+                    </span>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                        <Icon name="lucide:clock" class="w-4 h-4" />
+                        <span>{{ timeRemaining }} min remaining</span>
+                    </div>
+                </div>
+                <div class="w-full rounded-full h-2 bg-gray-200">
+                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        :style="{ width: `${assessmentStore.getProgressPercentage}%` }" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Content -->
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="rounded-lg shadow-sm border bg-white border-gray-200 p-8">
+                <h2 class="text-2xl font-light mb-8 leading-relaxed text-gray-900">
+                    {{ currentQuestion.text }}
+                </h2>
+
+                <!-- Likert Scale Options -->
+                <div class="space-y-3">
+                    <button v-for="(option, index) in likertOptions" :key="index" @click="handleAnswer(index)"
+                        class="w-full p-4 text-left border-2 rounded-md transition-all"
+                        :class="getOptionClasses(index)">
+                        <div class="flex items-center justify-between">
+                            <span>{{ option }}</span>
+                            <Icon v-if="selectedAnswer === index" name="linemd:confirm-circle"
+                                class="w-5 h-5 text-blue-600" />
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+                    <button @click="goToPrevious" :disabled="assessmentStore.currentQuestion === 0"
+                        class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="assessmentStore.currentQuestion === 0
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
+                        <Icon name="lucide:arrow-left" class="w-4 h-4" />
+                        <span>Previous</span>
+                    </button>
+
+                    <div class="text-sm text-gray-500">
+                        Select an answer to continue
+                    </div>
+
+                    <button @click="goToNext" :disabled="selectedAnswer === null"
+                        class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="selectedAnswer === null
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
+                        <span>Next</span>
+                        <Icon name="lucide:arrow-right" class="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { useAssessmentStore } from '~/stores/assessment'
+import { LIKERT_OPTIONS } from '~/types/assessment'
+
+// Store and reactive data
+const assessmentStore = useAssessmentStore()
+const selectedAnswer = ref<number | null>(null)
+const autoAdvanceTimeout = ref<NodeJS.Timeout | null>(null)
+
+// Computed properties
+const currentQuestion = computed(() => assessmentStore.getCurrentQuestion)
+const likertOptions = computed(() => LIKERT_OPTIONS)
+
+const timeRemaining = computed(() => {
+    const totalQuestions = assessmentStore.getTotalQuestions
+    const remaining = totalQuestions - assessmentStore.currentQuestion
+    const timePerQuestion = 4 / totalQuestions // 4 minutes total for 25 questions
+    return Math.ceil(remaining * timePerQuestion)
+})
+
+// Methods
+const getOptionClasses = (index: number) => {
+    if (selectedAnswer.value === index) {
+        return 'border-blue-500 bg-blue-50 text-blue-900'
+    }
+    return 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 text-gray-900'
+}
+
+const handleAnswer = (answerIndex: number) => {
+    selectedAnswer.value = answerIndex
+
+    // Save response to store
+    assessmentStore.setResponse(currentQuestion.value.id, answerIndex)
+
+    // Clear any existing timeout
+    if (autoAdvanceTimeout.value) {
+        clearTimeout(autoAdvanceTimeout.value)
+    }
+
+    // Auto-advance after 300ms delay
+    autoAdvanceTimeout.value = setTimeout(() => {
+        goToNext()
+    }, 300)
+}
+
+const goToNext = () => {
+    if (selectedAnswer.value !== null) {
+        // Clear timeout if manually advancing
+        if (autoAdvanceTimeout.value) {
+            clearTimeout(autoAdvanceTimeout.value)
+            autoAdvanceTimeout.value = null
+        }
+
+        if (assessmentStore.currentQuestion < assessmentStore.getTotalQuestions - 1) {
+            assessmentStore.nextQuestion()
+        } else {
+            // Assessment complete - navigate to results
+            assessmentStore.completeAssessment()
+            navigateTo('/assessment/results')
+        }
+    }
+}
+
+const goToPrevious = () => {
+    if (assessmentStore.currentQuestion > 0) {
+        // Clear any auto-advance timeout
+        if (autoAdvanceTimeout.value) {
+            clearTimeout(autoAdvanceTimeout.value)
+            autoAdvanceTimeout.value = null
+        }
+
+        assessmentStore.previousQuestion()
+    }
+}
+
+// Watch for question changes to update selected answer
+watch(() => assessmentStore.currentQuestion, () => {
+    // Load existing response for this question
+    const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
+    selectedAnswer.value = existingResponse !== undefined ? existingResponse : null
+
+    // Clear any pending auto-advance
+    if (autoAdvanceTimeout.value) {
+        clearTimeout(autoAdvanceTimeout.value)
+        autoAdvanceTimeout.value = null
+    }
+})
+
+// Initialize on mount
+onMounted(() => {
+    // Load existing response for current question
+    const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
+    selectedAnswer.value = existingResponse !== undefined ? existingResponse : null
+
+    // Start assessment if not already started
+    if (!assessmentStore.startTime) {
+        assessmentStore.startAssessment()
+    }
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+    if (autoAdvanceTimeout.value) {
+        clearTimeout(autoAdvanceTimeout.value)
+    }
+})
+</script>
