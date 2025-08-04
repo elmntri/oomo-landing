@@ -4,9 +4,15 @@
         <div class="border-b bg-white border-gray-200 px-6 py-4">
             <div class="max-w-4xl mx-auto">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-gray-600">
-                        Question {{ assessmentStore.currentQuestion + 1 }} of {{ assessmentStore.getTotalQuestions }}
-                    </span>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600">
+                            Question {{ assessmentStore.currentQuestion + 1 }} of {{ assessmentStore.getTotalQuestions
+                            }}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                            {{ answeredCount }} answered
+                        </span>
+                    </div>
                     <div class="flex items-center space-x-2 text-sm text-gray-500">
                         <Icon name="lucide:clock" class="w-4 h-4" />
                         <span>{{ timeRemaining }} min remaining</span>
@@ -37,6 +43,14 @@
                                 class="w-5 h-5 text-blue-600" />
                         </div>
                     </button>
+                </div>
+
+                <!-- Error Message -->
+                <div v-if="assessmentStore.error" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
+                    <div class="flex items-center space-x-2">
+                        <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-500" />
+                        <p class="text-red-700 text-sm">{{ assessmentStore.error }}</p>
+                    </div>
                 </div>
 
                 <!-- Navigation Controls -->
@@ -87,6 +101,10 @@ const timeRemaining = computed(() => {
     return Math.ceil(remaining * timePerQuestion)
 })
 
+const answeredCount = computed(() => {
+    return assessmentStore.getAllResponses().size
+})
+
 // Methods
 const getOptionClasses = (index: number) => {
     if (selectedAnswer.value === index) {
@@ -100,6 +118,11 @@ const handleAnswer = (answerIndex: number) => {
 
     // Save response to store
     assessmentStore.setResponse(currentQuestion.value.id, answerIndex)
+
+    // Clear any error messages when answering
+    if (assessmentStore.error) {
+        assessmentStore.error = null
+    }
 
     // Clear any existing timeout
     if (autoAdvanceTimeout.value) {
@@ -123,9 +146,21 @@ const goToNext = () => {
         if (assessmentStore.currentQuestion < assessmentStore.getTotalQuestions - 1) {
             assessmentStore.nextQuestion()
         } else {
-            // Assessment complete - navigate to results
-            assessmentStore.completeAssessment()
-            navigateTo('/assessment/results')
+            // Assessment complete - validate and navigate to results
+            const success = assessmentStore.completeAssessment()
+            if (success) {
+                navigateTo('/assessment/results')
+            } else {
+                // Handle validation error - could show error message or navigate to first unanswered question
+                const unanswered = assessmentStore.getUnansweredQuestions()
+                if (unanswered.length > 0) {
+                    // Navigate to first unanswered question
+                    const firstUnansweredIndex = assessmentStore.getAllQuestions.findIndex(q => q.id === unanswered[0])
+                    if (firstUnansweredIndex !== -1) {
+                        assessmentStore.setCurrentQuestion(firstUnansweredIndex)
+                    }
+                }
+            }
         }
     }
 }
@@ -153,10 +188,24 @@ watch(() => assessmentStore.currentQuestion, () => {
         clearTimeout(autoAdvanceTimeout.value)
         autoAdvanceTimeout.value = null
     }
+
+    // Clear any error messages when navigating
+    if (assessmentStore.error) {
+        assessmentStore.error = null
+    }
 })
 
 // Initialize on mount
 onMounted(() => {
+    // Load from storage first to restore any previous state
+    assessmentStore.loadFromStorage()
+
+    // If assessment is already complete, redirect to results
+    if (assessmentStore.isComplete && assessmentStore.results) {
+        navigateTo('/assessment/results')
+        return
+    }
+
     // Load existing response for current question
     const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
     selectedAnswer.value = existingResponse !== undefined ? existingResponse : null

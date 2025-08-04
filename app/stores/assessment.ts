@@ -239,9 +239,17 @@ export const useAssessmentStore = defineStore("assessment-store", {
     },
 
     completeAssessment() {
+      const validation = this.validateAssessmentCompletion();
+      if (!validation.isValid) {
+        this.error = validation.error || "Assessment validation failed";
+        return false;
+      }
+
       this.isComplete = true;
       this.results = this.calculateResults();
+      this.error = null;
       this.saveToStorage();
+      return true;
     },
 
     // Response management actions
@@ -392,6 +400,32 @@ export const useAssessmentStore = defineStore("assessment-store", {
 
     getResults(): AssessmentResults | null {
       return this.results;
+    },
+
+    // Validation methods
+    isQuestionAnswered(questionId: number): boolean {
+      return this.responses.has(questionId);
+    },
+
+    areAllQuestionsAnswered(): boolean {
+      return QUESTIONS.every((question) => this.responses.has(question.id));
+    },
+
+    getUnansweredQuestions(): number[] {
+      return QUESTIONS.filter(
+        (question) => !this.responses.has(question.id)
+      ).map((question) => question.id);
+    },
+
+    validateAssessmentCompletion(): { isValid: boolean; error?: string } {
+      if (!this.areAllQuestionsAnswered()) {
+        const unanswered = this.getUnansweredQuestions();
+        return {
+          isValid: false,
+          error: `Please answer all questions before completing the assessment. Missing: ${unanswered.length} question(s).`,
+        };
+      }
+      return { isValid: true };
     },
 
     // Persistence methods for localStorage integration
