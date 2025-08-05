@@ -85,7 +85,7 @@
                             <CardContent class="flex flex-col gap-6 pt-0">
                                 <p class="text-gray-600">Each dimension represents a key aspect of your biological
                                     terrain.
-                                    Scores below 68 indicate areas that need focused attention.</p>
+                                    Scores at or below 63 indicate areas that need focused attention.</p>
 
                                 <div class="flex flex-col gap-4">
                                     <div v-for="(score, dimension) in results.dimensionalScores" :key="dimension"
@@ -97,10 +97,6 @@
                                                     dimension }}</span>
                                                 <span class="text-xs sm:text-sm text-gray-600 truncate">{{
                                                     getDimensionName(dimension) }}</span>
-                                                <span v-if="score < 68"
-                                                    class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full w-fit">
-                                                    Gating
-                                                </span>
                                             </div>
                                         </div>
                                         <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
@@ -128,11 +124,11 @@
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                            <span class="text-gray-600">40-67: Developing</span>
+                                            <span class="text-gray-600">40-63: Developing</span>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                            <span class="text-gray-600">68+: Stable</span>
+                                            <span class="text-gray-600">64+: Stable</span>
                                         </div>
                                     </div>
                                 </div>
@@ -162,12 +158,12 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="text-2xl font-light text-blue-700">{{ results.timeEstimate.min
-                                    }}-{{
+                                        }}-{{
                                             results.timeEstimate.max }}</span>
                                     <span class="text-blue-600">weeks</span>
                                 </div>
                                 <p class="text-sm text-blue-600 pt-1">Based on your {{
-                                    getGateDimensionName(phaseInfo?.gateDimension) }} score</p>
+                                    getPhaseGatingDimensions(results.phase) }} scores</p>
                             </div>
                         </div>
                     </CardContent>
@@ -302,9 +298,19 @@ const getDimensionName = (dimension: DimensionKey): string => {
     return dimensionNames[dimension]
 }
 
-const getGateDimensionName = (dimension: DimensionKey | undefined): string => {
-    if (!dimension) return 'overall'
-    return getDimensionName(dimension)
+const getPhaseGatingDimensions = (phase: string): string => {
+    switch (phase) {
+        case "0.1":
+            return "Exit Readiness, Environmental Load, and Charge Reserve"
+        case "0.2":
+            return "Exit Readiness, Terrain Flexibility, and Coherence Synchrony"
+        case "0.3":
+            return "Mental Override, Stuckness Pattern, and Oscillatory Capacity"
+        case "0.4":
+            return "Terrain Flexibility, Stuckness Pattern, and Coherence Synchrony"
+        default:
+            return "overall system"
+    }
 }
 
 const getScoreRevealsMessage = (terrainScore: number): string => {
@@ -336,7 +342,7 @@ const getCoherenceMessage = (coherenceScore: number): string => {
 }
 
 const getDimensionCardClass = (score: number): string => {
-    if (score >= 68) {
+    if (score > 63) {
         return 'border-green-200 bg-green-50'
     } else if (score >= 40) {
         return 'border-yellow-200 bg-yellow-50'
@@ -346,7 +352,7 @@ const getDimensionCardClass = (score: number): string => {
 }
 
 const getDimensionScoreClass = (score: number): string => {
-    if (score >= 68) {
+    if (score > 63) {
         return 'text-green-700'
     } else if (score >= 40) {
         return 'text-yellow-700'
@@ -356,7 +362,7 @@ const getDimensionScoreClass = (score: number): string => {
 }
 
 const getDimensionBarClass = (score: number): string => {
-    if (score >= 68) {
+    if (score > 63) {
         return 'bg-green-400'
     } else if (score >= 40) {
         return 'bg-yellow-400'
