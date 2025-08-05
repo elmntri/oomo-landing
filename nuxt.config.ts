@@ -12,6 +12,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "shadcn-nuxt",
     "@pinia/nuxt",
+    "@formkit/auto-animate/nuxt",
   ],
   css: ["~/assets/css/tailwind.css"],
   vite: {

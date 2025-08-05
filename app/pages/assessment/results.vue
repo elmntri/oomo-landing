@@ -48,7 +48,7 @@
                                 </div>
                             </CardHeader>
                         </CollapsibleTrigger>
-                        <CollapsibleContent>
+                        <CollapsibleContent v-auto-animate>
                             <CardContent class="flex flex-col gap-6 pt-0">
                                 <div class="flex items-center gap-4">
                                     <span class="text-5xl">{{ results.scoreLabels.coherence.emoji }}</span>
@@ -69,7 +69,7 @@
                     </Collapsible>
                 </Card>
 
-                <!-- Section 3: Dimensional Breakdown (Collapsible) -->
+                <!-- Section 2: Dimensional Breakdown (Collapsible) -->
                 <Card>
                     <Collapsible v-model:open="showDimensionalScores">
                         <CollapsibleTrigger as-child>
@@ -81,7 +81,7 @@
                                 </div>
                             </CardHeader>
                         </CollapsibleTrigger>
-                        <CollapsibleContent>
+                        <CollapsibleContent v-auto-animate>
                             <CardContent class="flex flex-col gap-6 pt-0">
                                 <p class="text-gray-600">Each dimension represents a key aspect of your biological
                                     terrain.
@@ -137,39 +137,87 @@
                     </Collapsible>
                 </Card>
 
-                <!-- Section 4: Where You'll Start - Phase Assignment -->
+                <!-- Section 3: Where You'll Start - Phase Assignment -->
                 <Card>
                     <CardHeader>
                         <CardTitle>Where You'll Start</CardTitle>
                     </CardHeader>
                     <CardContent class="flex flex-col gap-6">
-                        <div class="flex-1">
-                            <h3 class="flex items-center gap-2 text-lg font-medium text-gray-900 pb-2">
-                                <span class="bg-blue-100 rounded-lg p-2">Phase {{ results.phase }}</span>
-                                <span>{{ phaseInfo?.name }}</span>
+
+                        <!-- Phase 1 Content -->
+                        <div v-if="results.phase === '1'" class="flex-1">
+                            <h3 class="text-lg font-medium text-gray-900 pb-4">
+                                You're ready to start building.
                             </h3>
-                            <p class="text-gray-700 leading-relaxed pb-4">{{ phaseInfo?.description }}</p>
+                            <div class="flex flex-col gap-4 text-gray-700 leading-relaxed">
+                                <p>You've cleared enough biological debt to begin Phase 1 — the first true phase of
+                                    coherence.</p>
+                                <p>That doesn't mean you're "done" with terrain prep. But it does mean:</p>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li>Your exits are flowing.</li>
+                                    <li>Your fascia and timing systems are stable enough to hold inputs.</li>
+                                    <li>Your body is ready to respond.</li>
+                                </ul>
+                                <p>This is where light, grounding, food, and other inputs begin to work as intended.
+                                    We'll help you layer progressively, so your system stays stable and continues
+                                    adapting.</p>
+                                <div class="bg-blue-50 rounded-md p-4 mt-4">
+                                    <p class="text-blue-800 font-medium">🚀 The goal now? Build momentum without
+                                        collapse. That's what Phase 1 is all about.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phase 0.x Content -->
+                        <div v-else class="flex-1">
+                            <h3 class="text-lg font-medium text-gray-900 pb-4">
+                                You're starting in <span
+                                    class="bg-blue-50 p-2 rounded-lg text-blue-700 font-semibold">Phase {{
+                                        results.phase }} –
+                                    {{ phaseInfo?.name }}</span>
+                            </h3>
+                            <div class="flex flex-col gap-4 text-gray-700 leading-relaxed">
+                                <p>You're beginning in {{ phaseInfo?.name }}, with the goal of resetting your terrain to
+                                    receive healthy inputs.</p>
+                                <p>Your current state suggests this phase may take you {{
+                                    getRelativeTimeDescription(results.multiplier) }}, depending on consistency and
+                                    terrain response.</p>
+                                <p>After this, you'll move through...</p>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li v-for="nextPhase in getNextPhases(results.phase)" :key="nextPhase.phase">
+                                        <strong>{{ nextPhase.phase }}</strong> which {{ nextPhase.timeDescription }}
+                                    </li>
+                                </ul>
+                                <p>...until you're ready to build, not just clear.</p>
+                                <div class="bg-amber-50 rounded-md p-4 mt-4">
+                                    <p class="text-amber-800"><strong>Remember:</strong> clearing debt isn't wasted
+                                        time. It's what makes your system responsive again. Inputs won't land until the
+                                        foundation is stable.</p>
+                                </div>
+                                <p class="text-sm text-gray-600 italic">When oomo opens, we'll share high-level time
+                                    estimates for this phase when you sign-in.</p>
+                            </div>
 
                             <!-- Time Estimate with Enhanced Visualization -->
-                            <div class="bg-blue-50 rounded-md p-4">
+                            <div class="bg-blue-50 rounded-md p-4 mt-6">
                                 <div class="flex items-center gap-2 pb-2">
                                     <Icon name="lucide:calendar" class="w-5 h-5 text-blue-600" />
                                     <span class="font-medium text-blue-900">Estimated Phase Duration</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-2xl font-light text-blue-700">{{ results.timeEstimate.min
-                                        }}-{{
-                                            results.timeEstimate.max }}</span>
+                                    <span class="text-2xl font-light text-blue-700">{{ results.timeEstimate.min }}-{{
+                                        results.timeEstimate.max }}</span>
                                     <span class="text-blue-600">weeks</span>
                                 </div>
                                 <p class="text-sm text-blue-600 pt-1">Based on your {{
                                     getPhaseGatingDimensions(results.phase) }} scores</p>
                             </div>
                         </div>
+
                     </CardContent>
                 </Card>
 
-                <!-- Section 5: What You'll Unlock -->
+                <!-- Section 4: What You'll Unlock -->
                 <Card>
                     <CardHeader>
                         <CardTitle>What You'll Unlock When oomo Opens</CardTitle>
@@ -189,9 +237,8 @@
                             </div>
                             <div class="flex items-start gap-3">
                                 <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                <p class="text-gray-700">You'll begin with Phase {{ results.phase }} that fits your
-                                    current
-                                    state, then unlock new actions as your system stabilizes.</p>
+                                <p class="text-gray-700">You'll begin with a phase that fits your current state, then
+                                    unlock new actions as your system stabilizes.</p>
                             </div>
                         </div>
 
@@ -208,7 +255,7 @@
                     </CardContent>
                 </Card>
 
-                <!-- Section 6: Save & Return CTA -->
+                <!-- Section 5: Save & Return CTA -->
                 <Card class="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                     <CardContent class="text-center p-8">
                         <h2 class="text-xl font-medium text-blue-900 pb-4">Save Your Score & Unlock Your Plan</h2>
@@ -264,8 +311,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useAssessmentStore } from '~/stores/assessment'
-import type { DimensionKey } from '~/types/assessment'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import type { DimensionKey, Phase } from '~/types/assessment'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { Button } from '~/components/ui/button'
 
@@ -311,6 +358,36 @@ const getPhaseGatingDimensions = (phase: string): string => {
         default:
             return "overall system"
     }
+}
+
+const getRelativeTimeDescription = (multiplier: number): string => {
+    if (multiplier <= 1.5) {
+        return "should be quick, taking much less time than average for you"
+    } else if (multiplier <= 2.5) {
+        return "will take you a slightly less than average amount of time"
+    } else if (multiplier <= 4.0) {
+        return "will require disciplined execution for a bit, but it will be worth it"
+    } else {
+        return "will require disciplined execution for an extended time, but it will be worth it"
+    }
+}
+
+const getNextPhases = (currentPhase: string) => {
+    const phaseOrder = ["0.1", "0.2", "0.3", "0.4", "1"]
+    const currentIndex = phaseOrder.indexOf(currentPhase)
+
+    if (currentIndex === -1 || currentIndex >= phaseOrder.length - 1) {
+        return []
+    }
+
+    const nextPhases = phaseOrder.slice(currentIndex + 1)
+    return nextPhases.map(phase => {
+        const phaseInfo = assessmentStore.getPhaseInfo[phase as Phase]
+        return {
+            phase: `${phase} (${phaseInfo?.name || ''})`,
+            timeDescription: phase === "1" ? "focuses on advanced integration" : "will prepare you for the next level"
+        }
+    })
 }
 
 const getScoreRevealsMessage = (terrainScore: number): string => {

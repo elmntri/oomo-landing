@@ -1,5 +1,3 @@
-Michael Chen I just realized that I can’t do Section 3 by onboarding phase, so I have to rethink the customization a bit. But here is the rest of it so you can start with it, if desired.
-
 Terrain Results Page (GTM)
 
 Goal:
@@ -85,7 +83,52 @@ This is where health becomes expansive. The work ahead is to sustain that state 
 
 Section 3: Customized by Various Scores
 
-TBD
+For users onboarding directly into Phase 1 (All receive same content)
+
+Header:
+You’re ready to start building.
+
+Copy:
+You’ve cleared enough biological debt to begin Phase 1 — the first true phase of coherence.
+
+That doesn’t mean you’re "done" with terrain prep. But it does mean:
+
+- Your exits are flowing.
+- Your fascia and timing systems are stable enough to hold inputs.
+- Your body is ready to respond.
+
+This is where light, grounding, food, and other inputs begin to work as intended.
+We’ll help you layer progressively, so your system stays stable and continues adapting.
+
+🚀 The goal now? Build momentum without collapse. That’s what Phase 1 is all about.
+
+For users onboarding into Phase 0.1–0.4
+
+Header:
+You’re starting in Phase [Subphase #] – [Subphase Name].
+
+Copy:
+You're beginning in [Subphase Name], with the goal of resetting your terrain to receive healthy inputs.
+
+Your current state suggests this phase may take you [Relative time], depending on consistency and terrain response.
+
+After this, you’ll move through...
+
+- [Next Phase 0 Subphase] which [Relative time]
+- [Next…]
+
+…until you're ready to build, not just clear.
+
+Remember: clearing debt isn’t wasted time. It’s what makes your system responsive again. Inputs won’t land until the foundation is stable.
+
+When oomo opens, we’ll share high-level time estimates for this phase when you sign-in.
+
+Multiplier Range Relative Time
+≤ 1.5 should be quick, taking much less time than average for you
+
+> 1.5 to ≤2.5 will take you a slightly less than average amount of time
+> 2.5 to ≤4.0 will require disciplined execution for a bit, but it will be worth it
+> 4.0 will require disciplined execution for an extended time, but it will be worth it
 
 ---
 

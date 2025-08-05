@@ -26,55 +26,62 @@
         </div>
 
         <!-- Question Content -->
-        <div class="max-w-3xl mx-auto px-6 py-12">
-            <div class="rounded-lg shadow-sm border bg-white border-gray-200 p-8">
-                <h2 class="text-2xl font-light mb-8 leading-relaxed text-gray-900">
-                    {{ currentQuestion.text }}
-                </h2>
-
-                <!-- Likert Scale Options -->
-                <div class="space-y-3">
-                    <button v-for="(option, index) in likertOptions" :key="index" @click="handleAnswer(index)"
-                        class="w-full p-4 text-left border-2 rounded-md transition-all"
-                        :class="getOptionClasses(index)">
-                        <div class="flex items-center justify-between">
-                            <span>{{ option }}</span>
-                            <Icon v-if="selectedAnswer === index" name="linemd:confirm-circle"
-                                class="w-5 h-5 text-blue-600" />
-                        </div>
-                    </button>
-                </div>
-
-                <!-- Error Message -->
-                <div v-if="assessmentStore.error" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
-                    <div class="flex items-center space-x-2">
-                        <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-500" />
-                        <p class="text-red-700 text-sm">{{ assessmentStore.error }}</p>
-                    </div>
-                </div>
-
-                <!-- Navigation Controls -->
-                <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-                    <button @click="goToPrevious" :disabled="assessmentStore.currentQuestion === 0"
-                        class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="assessmentStore.currentQuestion === 0
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
-                        <Icon name="lucide:arrow-left" class="w-4 h-4" />
-                        <span>Previous</span>
-                    </button>
-
-                    <div class="text-sm text-gray-500">
-                        Select an answer to continue
+        <div class="max-w-3xl mx-auto px-6 py-8">
+            <Transition name="question" mode="out-in">
+                <div :key="assessmentStore.currentQuestion"
+                    class="rounded-lg shadow-sm border bg-white border-gray-200 p-8">
+                    <!-- Question Section - Fixed Height -->
+                    <div class="min-h-[150px] flex items-center mb-8">
+                        <h2 class="text-2xl font-light leading-relaxed text-gray-900 w-full">
+                            {{ currentQuestion.text }}
+                        </h2>
                     </div>
 
-                    <button @click="goToNext" :disabled="selectedAnswer === null"
-                        class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="selectedAnswer === null
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
-                        <span>Next</span>
-                        <Icon name="lucide:arrow-right" class="w-4 h-4" />
-                    </button>
+                    <!-- Choices Section - Consistent Layout -->
+                    <div class="space-y-3">
+                        <button v-for="(option, index) in likertOptions" :key="index" @click="handleAnswer(index)"
+                            class="w-full p-4 text-left border-2 rounded-md transition-all"
+                            :class="getOptionClasses(index)">
+                            <div class="flex items-center justify-between">
+                                <span>{{ option }}</span>
+                                <Icon v-if="selectedAnswer === index" name="linemd:confirm-circle"
+                                    class="w-5 h-5 text-blue-600" />
+                            </div>
+                        </button>
+                    </div>
                 </div>
+            </Transition>
+
+            <!-- Error Message -->
+            <div v-if="assessmentStore.error" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
+                <div class="flex items-center space-x-2">
+                    <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-500" />
+                    <p class="text-red-700 text-sm">{{ assessmentStore.error }}</p>
+                </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div
+                class="flex items-center justify-between mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+                <button @click="goToPrevious" :disabled="assessmentStore.currentQuestion === 0"
+                    class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="assessmentStore.currentQuestion === 0
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
+                    <Icon name="lucide:arrow-left" class="w-4 h-4" />
+                    <span>Previous</span>
+                </button>
+
+                <div class="text-sm text-gray-500">
+                    Select an answer to continue
+                </div>
+
+                <button @click="goToNext" :disabled="selectedAnswer === null"
+                    class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="selectedAnswer === null
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
+                    <span>Next</span>
+                    <Icon name="lucide:arrow-right" class="w-4 h-4" />
+                </button>
             </div>
         </div>
     </div>
@@ -223,3 +230,24 @@ onUnmounted(() => {
     }
 })
 </script>
+
+<style scoped>
+/* Question transition animations */
+.question-enter-active,
+.question-leave-active {
+    transition: all 0.2s ease-in-out;
+}
+
+.question-enter-from {
+    opacity: 0;
+}
+
+.question-leave-to {
+    opacity: 0;
+}
+
+.question-enter-to,
+.question-leave-from {
+    opacity: 1;
+}
+</style>
