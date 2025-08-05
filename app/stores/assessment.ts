@@ -326,32 +326,108 @@ export const useAssessmentStore = defineStore("assessment-store", {
     },
 
     assignPhase(dimensionalScores: DimensionalScores): Phase {
-      // Phase assignment logic based on dimensional score thresholds
-      if (dimensionalScores.D1 < 68) return "0.1";
-      if (dimensionalScores.D4 < 68) return "0.2";
-      if (dimensionalScores.D2 < 68) return "0.3";
-      if (dimensionalScores.D5 < 68) return "0.4";
+      // Phase assignment logic based on minimum of 3 dimensions per phase
+      if (
+        Math.min(
+          dimensionalScores.D1,
+          dimensionalScores.D8,
+          dimensionalScores.D5
+        ) <= 63
+      )
+        return "0.1";
+      if (
+        Math.min(
+          dimensionalScores.D1,
+          dimensionalScores.D4,
+          dimensionalScores.D6
+        ) <= 63
+      )
+        return "0.2";
+      if (
+        Math.min(
+          dimensionalScores.D2,
+          dimensionalScores.D7,
+          dimensionalScores.D3
+        ) <= 63
+      )
+        return "0.3";
+      if (
+        Math.min(
+          dimensionalScores.D4,
+          dimensionalScores.D7,
+          dimensionalScores.D6
+        ) <= 63
+      )
+        return "0.4";
       return "1";
     },
 
-    calculatePhaseTime(phase: Phase, dimensionalScore: number): TimeEstimate {
+    calculateMultiplier(dimensionalScore: number): number {
+      // Time estimation formula: Base_Time × (1 + (80 – Dx) / 30)²
+      return Math.pow(1 + (80 - dimensionalScore) / 30, 2);
+    },
+
+    calculatePhaseTime(
+      phase: Phase,
+      dimensionalScores: DimensionalScores
+    ): TimeEstimate {
       const phaseInfo = PHASE_INFO[phase];
       const baseTime = phaseInfo.baseTime;
 
-      // Time estimation formula: Base_Time × (1 + (80 – Dx) / 30)²
-      const multiplier = Math.pow(1 + (80 - dimensionalScore) / 30, 2);
+      // Get minimum of the 3 dimensional subscores for the phase
+      let minScore: number;
+      switch (phase) {
+        case "0.1":
+          minScore = Math.min(
+            dimensionalScores.D1,
+            dimensionalScores.D8,
+            dimensionalScores.D5
+          );
+          break;
+        case "0.2":
+          minScore = Math.min(
+            dimensionalScores.D4,
+            dimensionalScores.D1,
+            dimensionalScores.D6
+          );
+          break;
+        case "0.3":
+          minScore = Math.min(
+            dimensionalScores.D2,
+            dimensionalScores.D3,
+            dimensionalScores.D7
+          );
+          break;
+        case "0.4":
+          minScore = Math.min(
+            dimensionalScores.D5,
+            dimensionalScores.D6,
+            dimensionalScores.D7
+          );
+          break;
+        default:
+          minScore = 80; // Phase 1 doesn't need time estimation
+      }
+
+      const multiplier = this.calculateMultiplier(minScore);
       const exactTime = baseTime * multiplier;
 
-      // Convert to time range based on score bands
+      // Convert to time range based on exact time bands
       let range: number;
-      if (dimensionalScore >= 80) {
+      if (exactTime <= 3) {
         range = 0.5; // ±0.5 weeks
-      } else if (dimensionalScore >= 60) {
+      } else if (exactTime <= 6) {
         range = 1; // ±1 week
-      } else if (dimensionalScore >= 40) {
+      } else if (exactTime <= 10) {
         range = 2; // ±2 weeks
+      } else if (exactTime <= 15) {
+        range = 3; // ±3 weeks
       } else {
-        range = 3; // ±3 weeks for low scores
+        // Deep collapse: -3 to +4 weeks (capped)
+        return {
+          min: Math.max(1, Math.round(exactTime - 3)),
+          max: Math.round(exactTime + 4),
+        };
       }
 
       return {
@@ -380,10 +456,44 @@ export const useAssessmentStore = defineStore("assessment-store", {
       const coherenceScore = this.calculateCoherenceScore(dimensionalScores);
       const phase = this.assignPhase(dimensionalScores);
 
-      // Get the gating dimension score for time estimation
-      const phaseInfo = PHASE_INFO[phase];
-      const gateDimensionScore = dimensionalScores[phaseInfo.gateDimension];
-      const timeEstimate = this.calculatePhaseTime(phase, gateDimensionScore);
+      const timeEstimate = this.calculatePhaseTime(phase, dimensionalScores);
+
+      // Get minimum score for the assigned phase for multiplier calculation
+      let minScore: number;
+      switch (phase) {
+        case "0.1":
+          minScore = Math.min(
+            dimensionalScores.D1,
+            dimensionalScores.D8,
+            dimensionalScores.D5
+          );
+          break;
+        case "0.2":
+          minScore = Math.min(
+            dimensionalScores.D4,
+            dimensionalScores.D1,
+            dimensionalScores.D6
+          );
+          break;
+        case "0.3":
+          minScore = Math.min(
+            dimensionalScores.D2,
+            dimensionalScores.D3,
+            dimensionalScores.D7
+          );
+          break;
+        case "0.4":
+          minScore = Math.min(
+            dimensionalScores.D5,
+            dimensionalScores.D6,
+            dimensionalScores.D7
+          );
+          break;
+        default:
+          minScore = 80; // Phase 1
+      }
+
+      const multiplier = this.calculateMultiplier(minScore);
 
       return {
         terrainScore,
@@ -391,6 +501,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
         dimensionalScores,
         phase,
         timeEstimate,
+        multiplier,
         scoreLabels: {
           terrain: this.getScoreLabel(terrainScore, "terrain"),
           coherence: this.getScoreLabel(coherenceScore, "coherence"),

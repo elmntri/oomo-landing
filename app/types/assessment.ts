@@ -41,6 +41,7 @@ export interface AssessmentResults {
   dimensionalScores: DimensionalScores;
   phase: Phase;
   timeEstimate: TimeEstimate;
+  multiplier: number;
   scoreLabels: {
     terrain: ScoreLabel;
     coherence: ScoreLabel;
@@ -97,7 +98,6 @@ export interface PhaseInfo {
   name: string;
   description: string;
   baseTime: number; // in weeks
-  gateDimension: DimensionKey;
 }
 // Dimension mapping configuration with precise types
 export const DIMENSION_MAPPING: Record<DimensionKey, number[]> = {
@@ -182,35 +182,31 @@ export const COHERENCE_SCORE_LABELS: Record<ScoreRangeKey, ScoreLabel> = {
 export const PHASE_INFO: Record<Phase, PhaseInfo> = {
   "0.1": {
     phase: "0.1",
-    name: "Exit Readiness",
+    name: "Exits",
     description:
       "Focus on clearing exit pathways - bile flow, digestion, elimination, and fascia drainage.",
     baseTime: 2.5,
-    gateDimension: "D1",
   },
   "0.2": {
     phase: "0.2",
-    name: "Terrain Flexibility",
+    name: "Fascia",
     description:
       "Unlock fascia pliability, improve microcirculation, and restore movement-induced flow.",
     baseTime: 2,
-    gateDimension: "D4",
   },
   "0.3": {
     phase: "0.3",
-    name: "Mental Override",
+    name: "Override",
     description:
       "Address signal suppression, trauma loops, and false resilience patterns.",
     baseTime: 1.5,
-    gateDimension: "D2",
   },
   "0.4": {
     phase: "0.4",
-    name: "Charge Reserve",
+    name: "Charge",
     description:
       "Build sustainable energy reserves and optimize mitochondrial function.",
     baseTime: 2,
-    gateDimension: "D5",
   },
   "1": {
     phase: "1",
@@ -218,6 +214,5 @@ export const PHASE_INFO: Record<Phase, PhaseInfo> = {
     description:
       "Advanced integration of all systems with full coherence and adaptability.",
     baseTime: 4,
-    gateDimension: "D1", // All dimensions ≥ 68
   },
 };
