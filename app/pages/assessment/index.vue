@@ -31,8 +31,8 @@
                 <div :key="assessmentStore.currentQuestion"
                     class="rounded-lg shadow-sm border bg-white border-gray-200 p-8">
                     <!-- Question Section - Fixed Height -->
-                    <div class="min-h-[150px] flex items-center mb-8">
-                        <h2 class="text-2xl font-light leading-relaxed text-gray-900 w-full">
+                    <div class="min-h-[80px] lg:min-h-[150px] flex items-center mb-4">
+                        <h2 class="text-sm lg:text-2xl font-light leading-relaxed text-gray-900 w-full">
                             {{ currentQuestion.text }}
                         </h2>
                     </div>
@@ -40,10 +40,10 @@
                     <!-- Choices Section - Consistent Layout -->
                     <div class="space-y-3">
                         <button v-for="(option, index) in likertOptions" :key="index" @click="handleAnswer(index)"
-                            class="w-full p-4 text-left border-2 rounded-md transition-all"
+                            class="w-full px-4 py-2 lg:px-4 lg:py-4 text-left border-2 rounded-md transition-all"
                             :class="getOptionClasses(index)">
                             <div class="flex items-center justify-between">
-                                <span>{{ option }}</span>
+                                <span class="text-sm lg:text-base">{{ option }}</span>
                                 <Icon v-if="selectedAnswer === index" name="linemd:confirm-circle"
                                     class="w-5 h-5 text-blue-600" />
                             </div>
@@ -65,21 +65,19 @@
                 class="flex items-center justify-between mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
                 <button @click="goToPrevious" :disabled="assessmentStore.currentQuestion === 0"
                     class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="assessmentStore.currentQuestion === 0
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-800 hover:text-gray-900 hover:bg-gray-100'">
                     <Icon name="lucide:arrow-left" class="w-4 h-4" />
-                    <span>Previous</span>
                 </button>
 
-                <div class="text-sm text-gray-500">
+                <div class="text-sm lg:text-base text-gray-500 text-center">
                     Select an answer to continue
                 </div>
 
                 <button @click="goToNext" :disabled="selectedAnswer === null"
                     class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="selectedAnswer === null
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'">
-                    <span>Next</span>
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-800 hover:text-gray-900 hover:bg-gray-100'">
                     <Icon name="lucide:arrow-right" class="w-4 h-4" />
                 </button>
             </div>
@@ -117,7 +115,7 @@ const getOptionClasses = (index: number) => {
     if (selectedAnswer.value === index) {
         return 'border-blue-500 bg-blue-50 text-blue-900'
     }
-    return 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 text-gray-900'
+    return 'border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-900'
 }
 
 const handleAnswer = (answerIndex: number) => {

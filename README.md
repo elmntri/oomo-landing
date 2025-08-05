@@ -179,7 +179,7 @@ The application uses shadcn/ui components with Tailwind CSS for consistent styli
 
 - **No Margins**: Use `gap` and `padding` instead of margins wherever possible
 - **Inline UI**: Keep UI code in-line within pages unless components can be reused when abstracted
-- **Responsive Design**: Mobile-first approach with responsive utilities
+- **Responsive Design**: Mobile-first approach with responsive utilities (example: text-sm lg:text-base xl:text-xl)
 
 ### Component Styling Patterns
 
