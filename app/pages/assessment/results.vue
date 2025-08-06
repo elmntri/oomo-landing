@@ -264,9 +264,39 @@
                             Come back then to keep learning—with your own system as the textbook.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button @click="saveResults" size="lg" class="px-8">
-                                Save & Get Notified
-                            </Button>
+                            <Dialog v-model:open="showSaveDialog">
+                                <DialogTrigger as-child>
+                                    <Button size="lg" class="px-8">
+                                        Save & Get Notified
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent class="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Save Your Results</DialogTitle>
+                                    </DialogHeader>
+                                    <div class="space-y-4 py-4">
+                                        <p class="text-sm text-gray-600">
+                                            Enter your email to save your assessment results and get notified when oomo
+                                            opens.
+                                        </p>
+                                        <div class="space-y-2">
+                                            <Label for="email">Email Address</Label>
+                                            <Input id="email" v-model="email" type="email" placeholder="your@email.com"
+                                                :class="emailError ? 'border-red-500' : ''"
+                                                @keyup.enter="handleSaveResults" />
+                                            <p v-if="emailError" class="text-sm text-red-600">{{ emailError }}</p>
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button @click="handleSaveResults" :disabled="isSaving"
+                                            class="w-full sm:w-auto">
+                                            <Icon v-if="isSaving" name="lucide:loader"
+                                                class="w-4 h-4 mr-2 animate-spin" />
+                                            {{ isSaving ? 'Saving...' : 'Save Results' }}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                             <Button @click="retakeAssessment" variant="outline" size="lg" class="px-8">
                                 Retake Assessment
                             </Button>
@@ -315,11 +345,18 @@ import type { DimensionKey, Phase } from '~/types/assessment'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { Button } from '~/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '~/components/ui/dialog'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 
 // Store and reactive data
 const assessmentStore = useAssessmentStore()
 const showDimensionalScores = ref(false)
 const showCoherenceDetails = ref(false)
+const showSaveDialog = ref(false)
+const email = ref('')
+const emailError = ref('')
+const isSaving = ref(false)
 
 // Computed properties
 const results = computed(() => assessmentStore.getResults())
@@ -448,10 +485,49 @@ const getDimensionBarClass = (score: number): string => {
     }
 }
 
+const validateEmail = (emailValue: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(emailValue)
+}
+
 const saveResults = () => {
-    // Results are already saved to localStorage via the store
-    // Could add additional functionality here like email capture
-    alert('Results saved! You can return to view them anytime.')
+    showSaveDialog.value = true
+    email.value = ''
+    emailError.value = ''
+}
+
+const handleSaveResults = async () => {
+    // Reset error
+    emailError.value = ''
+
+    // Validate email
+    if (!email.value.trim()) {
+        emailError.value = 'Email is required'
+        return
+    }
+
+    if (!validateEmail(email.value.trim())) {
+        emailError.value = 'Please enter a valid email address'
+        return
+    }
+
+    // Set saving state
+    isSaving.value = true
+
+    try {
+        // Call the store action to save results
+        const success = await assessmentStore.storeAssessmentResults(email.value.trim())
+
+        if (success) {
+            showSaveDialog.value = false
+            // You could show a success toast here instead of alert
+            alert('Results saved successfully! We\'ll notify you when oomo opens.')
+        } else {
+            emailError.value = "Failed to save your results. Try again or contact support if issue persists"
+        }
+    } finally {
+        isSaving.value = false
+    }
 }
 
 const retakeAssessment = () => {

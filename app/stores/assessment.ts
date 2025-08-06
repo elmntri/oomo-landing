@@ -11,6 +11,7 @@ import type {
   DimensionKey,
   ScoreRangeKey,
 } from "~/types/assessment";
+
 import {
   DIMENSION_MAPPING,
   TERRAIN_SCORE_LABELS,
@@ -589,6 +590,47 @@ export const useAssessmentStore = defineStore("assessment-store", {
 
       if (typeof window !== "undefined") {
         localStorage.removeItem("coherence-assessment");
+      }
+    },
+
+    // API action to temporarily store assessment results
+    async storeAssessmentResults(email: string): Promise<boolean> {
+      if (!this.results) {
+        this.error = "No assessment results to store";
+        return false;
+      }
+
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const response = await fetch(
+          "https://staging.oomo.health/api/v1/assessments",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              content: JSON.stringify(this.results),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        this.isLoading = false;
+        return true;
+      } catch (error) {
+        this.error =
+          error instanceof Error
+            ? error.message
+            : "Failed to store assessment results";
+        this.isLoading = false;
+        return false;
       }
     },
   },
