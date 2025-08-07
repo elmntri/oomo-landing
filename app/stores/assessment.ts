@@ -605,7 +605,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
 
       try {
         const response = await fetch(
-          "https://staging.oomo.health/api/v1/assessments",
+          "https://v2.oomo.health/api/v1/assessments",
           {
             method: "POST",
             headers: {
