@@ -1,21 +1,25 @@
 <template>
     <div class="min-h-screen bg-gray-50">
         <!-- Progress Header -->
-        <div class="border-b bg-white border-gray-200 px-6 py-4">
+        <div class="border-b bg-white border-gray-200 px-4 lg:px-6 py-3 lg:py-4">
             <div class="max-w-4xl mx-auto">
                 <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">
-                            Question {{ assessmentStore.currentQuestion + 1 }} of {{ assessmentStore.getTotalQuestions
-                            }}
-                        </span>
-                        <span class="text-xs text-gray-500">
-                            {{ answeredCount }} answered
-                        </span>
+                    <div class="flex items-center space-x-2 lg:space-x-4">
+                        <img src="/logo.svg" alt="OOMO" class="w-6 h-6 lg:w-8 lg:h-8 flex-shrink-0" />
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                            <span class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                                Question {{ assessmentStore.currentQuestion + 1 }} of {{
+                                    assessmentStore.getTotalQuestions
+                                }}
+                            </span>
+                            <span class="text-xs text-gray-500 whitespace-nowrap">
+                                {{ answeredCount }} answered
+                            </span>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2 text-sm text-gray-500">
-                        <Icon name="lucide:clock" class="w-4 h-4" />
-                        <span>{{ timeRemaining }} min remaining</span>
+                    <div class="flex items-center space-x-1 lg:space-x-2 text-xs lg:text-sm text-gray-500">
+                        <Icon name="lucide:clock" class="w-3 h-3 lg:w-4 lg:h-4" />
+                        <span class="whitespace-nowrap">{{ timeRemaining }}m</span>
                     </div>
                 </div>
                 <div class="w-full rounded-full h-2 bg-gray-200">

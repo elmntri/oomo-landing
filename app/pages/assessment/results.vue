@@ -1,10 +1,13 @@
 <template>
     <div class="min-h-screen bg-gray-50">
         <!-- Header -->
-        <div class="border-b bg-white border-gray-200 px-6 py-4">
+        <div class="border-b bg-white border-gray-200 px-4 lg:px-6 py-3 lg:py-4">
             <div class="max-w-4xl mx-auto">
-                <h1 class="text-2xl font-light text-gray-900">Your Assessment Results</h1>
-                <p class="text-gray-600 pt-1">Personalized insights based on your responses</p>
+                <div class="flex items-center space-x-3 mb-2">
+                    <img src="/logo.svg" alt="OOMO" class="w-8 h-8 lg:w-10 lg:h-10 flex-shrink-0" />
+                    <h1 class="text-xl lg:text-2xl font-light text-gray-900">Your Assessment Results</h1>
+                </div>
+                <!-- <p class="text-sm lg:text-base text-gray-600">Personalized insights based on your responses</p> -->
             </div>
         </div>
 
