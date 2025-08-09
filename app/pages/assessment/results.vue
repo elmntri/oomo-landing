@@ -32,15 +32,6 @@
                                 <p class="text-sm text-gray-500 pt-1">Terrain Score</p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Section 2: What Your Score Reveals -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>What Your Score Reveals</CardTitle>
-                    </CardHeader>
-                    <CardContent class="flex flex-col gap-6">
                         <div class="bg-gray-50 rounded-md p-4">
                             <div class="text-gray-700 leading-relaxed whitespace-pre-line">{{
                                 getScoreRevealsMessage(results.terrainScore) }}
@@ -49,7 +40,7 @@
                     </CardContent>
                 </Card>
 
-                <!-- Section 3: Coherence Score (Collapsible) -->
+                <!-- Section 2: Coherence Score (Collapsible) -->
                 <Card>
                     <Collapsible v-model:open="showCoherenceDetails">
                         <CollapsibleTrigger as-child>
@@ -82,7 +73,7 @@
                     </Collapsible>
                 </Card>
 
-                <!-- Section 4: Where You'll Start - Phase Assignment -->
+                <!-- Section 3: Where You'll Start - Phase Assignment -->
                 <Card>
                     <CardHeader>
                         <CardTitle>Where You'll Start</CardTitle>
@@ -125,7 +116,7 @@
                                 <p>You're beginning in {{ phaseInfo?.name }}, with the goal of resetting your terrain to
                                     receive healthy inputs.</p>
                                 <p>Your current state suggests this phase may take you {{
-                                    getRelativeTimeDescription(results.multiplier) }}, depending on consistency and
+                                    getRelativeTimeDescription(results) }}, depending on consistency and
                                     terrain response.</p>
                                 <p>After this, you'll move through...</p>
                                 <ul class="list-disc pl-6 space-y-1">
@@ -139,8 +130,6 @@
                                         time. It's what makes your system responsive again. Inputs won't land until the
                                         foundation is stable.</p>
                                 </div>
-                                <p class="text-sm text-gray-600 italic">When oomo opens, we'll share high-level time
-                                    estimates for this phase when you sign-in.</p>
                             </div>
 
                             <!-- Time Estimate with Enhanced Visualization -->
@@ -149,20 +138,16 @@
                                     <Icon name="lucide:calendar" class="w-5 h-5 text-blue-600" />
                                     <span class="font-medium text-blue-900">Estimated Phase Duration</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-2xl font-light text-blue-700">{{ results.timeEstimate.min }}-{{
-                                        results.timeEstimate.max }}</span>
-                                    <span class="text-blue-600">weeks</span>
-                                </div>
-                                <p class="text-sm text-blue-600 pt-1">Based on your {{
-                                    getPhaseGatingDimensions(results.phase) }} scores</p>
+                                <p class="text-sm text-blue-600 pt-1"> When oomo opens, we'll share high-level time
+                                    estimates for this phase when you sign-in, based on your {{
+                                        getPhaseGatingDimensions(results.phase) }} scores</p>
                             </div>
                         </div>
 
                     </CardContent>
                 </Card>
 
-                <!-- Section 5: What You'll Unlock -->
+                <!-- Section 4: What You'll Unlock -->
                 <Card>
                     <CardHeader>
                         <CardTitle>What You'll Unlock When oomo Opens</CardTitle>
@@ -200,7 +185,7 @@
                     </CardContent>
                 </Card>
 
-                <!-- Section 6: Save & Return CTA -->
+                <!-- Section 5: Save & Return CTA -->
                 <Card class="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                     <CardContent class="text-center p-8">
                         <h2 class="text-xl font-medium text-blue-900 pb-4">Save Your Score & Unlock Your Plan</h2>
@@ -212,7 +197,7 @@
                             <Dialog v-model:open="showSaveDialog">
                                 <DialogTrigger as-child>
                                     <Button size="lg" class="px-8">
-                                        Save & Get Notified
+                                        Save Score & Sign-Up for Waitlist
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent class="sm:max-w-md">
@@ -328,15 +313,16 @@ const getPhaseGatingDimensions = (phase: string): string => {
     }
 }
 
-const getRelativeTimeDescription = (multiplier: number): string => {
-    if (multiplier <= 1.5) {
-        return "should be quick, taking much less time than average for you"
-    } else if (multiplier <= 2.5) {
-        return "will take you a slightly less than average amount of time"
-    } else if (multiplier <= 4.0) {
-        return "will require disciplined execution for a bit, but it will be worth it"
+const getRelativeTimeDescription = (results: any): string => {
+    if (!results.timeEstimate) return "some time";
+
+    const min = results.timeEstimate.min;
+    const max = results.timeEstimate.max;
+
+    if (min === max) {
+        return `${min} week${min !== 1 ? 's' : ''}`;
     } else {
-        return "will require disciplined execution for an extended time, but it will be worth it"
+        return `${min}-${max} weeks`;
     }
 }
 
