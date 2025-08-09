@@ -114,34 +114,34 @@ export const DIMENSION_MAPPING: Record<DimensionKey, number[]> = {
 // Score label configurations with precise types
 export const TERRAIN_SCORE_LABELS: Record<ScoreRangeKey, ScoreLabel> = {
   "0-19": {
-    emoji: "⚠️",
-    label: "System Stalled",
+    emoji: "🟥",
+    label: "Dysfunction",
     description:
-      "Deeply impaired exits, override, or charge. System dysfunction requires foundational support.",
+      "Your body is protecting itself.\nThis score reflects a system under significant internal strain. You may not feel terrible all the time — but at the cellular level, your terrain is likely stuck, congested, or collapsing under load.\n\nThat's not failure. It's your body safely limiting change until conditions improve.\n\nThis is the hardest phase to see clearly, but also the most essential to start. Once exits unblock and pressure softens, healing becomes possible again.",
   },
   "20-39": {
-    emoji: "🪨",
-    label: "Blocked Terrain",
+    emoji: "🟧",
+    label: "Low Capacity",
     description:
-      "Some movement possible, but terrain is rigid, burdened, or low-charge. Significant overload present.",
+      "Your terrain is overloaded.\nThis score shows your system is still working through some combination of congestion, rigidity, depletion, or timing misalignment. These create functional blockages — not just symptoms — that make it hard to adapt to even helpful inputs.\n\nThat doesn't mean your body isn't trying. It means it's holding the line until conditions are safer.\n\nWe begin by clearing space — so your system can stop protecting and start responding.",
   },
   "40-59": {
-    emoji: "🌿",
-    label: "Starting to Open",
+    emoji: "🟨",
+    label: "Transitional State",
     description:
-      "Key exits or signals are beginning to respond. Active re-alignment needed for stability.",
+      "You're close — but still blocked.\nThis score reflects a system that has pieces in place, but one or more bottlenecks are still dragging down your overall readiness. That might be drainage, charge, override, or structural stuckness.\n\nYou don't need to overhaul everything. But you do need targeted sequencing — supporting what's ready, while softening what's not.\n\nThis is where momentum builds — if you work with your terrain, not against it.",
   },
   "60-79": {
-    emoji: "🌱",
-    label: "Gaining Ground",
+    emoji: "🟩",
+    label: "Emerging Stability",
     description:
-      "Terrain is loosening; ready for deeper pattern work and early rhythm establishment.",
+      "Your system is beginning to stabilize.\nThis score reflects a terrain with improving coherence, charge, and flexibility — strong enough to take on more input, but not yet fully locked in. One or two systems may still wobble under stress.\n\nThe key now is integration: making sure signal clarity and rhythm hold under real-world complexity.\n\nThis is where the work gets smarter, not harder.",
   },
   "80-100": {
-    emoji: "🌳",
-    label: "Stable & Responsive",
+    emoji: "🟦",
+    label: "Readiness",
     description:
-      "Structural and signaling coherence is present. System ready for advanced integration.",
+      "Your system is capable of receiving.\nThis score reflects a terrain with strong signs of coherence, open exits, buffered charge, and stable rhythms.\n\nThat doesn't guarantee everything is optimal — but it does suggest your body is ready to amplify healing, not resist it.\n\nThis is where health becomes expansive. The work ahead is to sustain that state under stress, deepen system flexibility, and eventually support others still on their way.",
   },
 };
 

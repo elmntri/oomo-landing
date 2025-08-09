@@ -14,7 +14,7 @@
         <!-- Results Content -->
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div v-if="results" class="flex flex-col gap-8">
-                <!-- Section 1: Terrain Results -->
+                <!-- Section 1: Your Score -->
                 <Card>
                     <CardHeader>
                         <CardTitle>Your Terrain Score</CardTitle>
@@ -32,14 +32,24 @@
                                 <p class="text-sm text-gray-500 pt-1">Terrain Score</p>
                             </div>
                         </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Section 2: What Your Score Reveals -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle>What Your Score Reveals</CardTitle>
+                    </CardHeader>
+                    <CardContent class="flex flex-col gap-6">
                         <div class="bg-gray-50 rounded-md p-4">
-                            <p class="text-gray-700 leading-relaxed">{{ getScoreRevealsMessage(results.terrainScore) }}
-                            </p>
+                            <div class="text-gray-700 leading-relaxed whitespace-pre-line">{{
+                                getScoreRevealsMessage(results.terrainScore) }}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <!-- Section 2: Coherence Score (Collapsible) -->
+                <!-- Section 3: Coherence Score (Collapsible) -->
                 <Card>
                     <Collapsible v-model:open="showCoherenceDetails">
                         <CollapsibleTrigger as-child>
@@ -72,75 +82,7 @@
                     </Collapsible>
                 </Card>
 
-                <!-- Section 2: Dimensional Breakdown (Collapsible) -->
-                <Card>
-                    <Collapsible v-model:open="showDimensionalScores">
-                        <CollapsibleTrigger as-child>
-                            <CardHeader class="cursor-pointer">
-                                <div class="flex items-center justify-between w-full">
-                                    <CardTitle>Your Dimensional Breakdown</CardTitle>
-                                    <Icon :name="showDimensionalScores ? 'lucide:chevron-up' : 'lucide:chevron-down'"
-                                        class="w-5 h-5 text-gray-500" />
-                                </div>
-                            </CardHeader>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent v-auto-animate>
-                            <CardContent class="flex flex-col gap-6 pt-0">
-                                <p class="text-gray-600">Each dimension represents a key aspect of your biological
-                                    terrain.
-                                    Scores at or below 63 indicate areas that need focused attention.</p>
-
-                                <div class="flex flex-col gap-4">
-                                    <div v-for="(score, dimension) in results.dimensionalScores" :key="dimension"
-                                        class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-lg border"
-                                        :class="getDimensionCardClass(score)">
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                                                <span class="font-medium text-gray-900 text-sm sm:text-base">{{
-                                                    dimension }}</span>
-                                                <span class="text-xs sm:text-sm text-gray-600 truncate">{{
-                                                    getDimensionName(dimension) }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                                            <span class="text-lg sm:text-xl font-medium"
-                                                :class="getDimensionScoreClass(score)">
-                                                {{ Math.round(score) }}
-                                            </span>
-                                            <div class="w-20 sm:w-24 bg-gray-200 rounded-full h-2">
-                                                <div class="h-2 rounded-full transition-all duration-300"
-                                                    :class="getDimensionBarClass(score)"
-                                                    :style="{ width: `${Math.min(score, 100)}%` }">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Scoring Legend -->
-                                <div class="p-4 bg-gray-50 rounded-lg">
-                                    <h4 class="font-medium text-gray-900 pb-2">Understanding Your Scores</h4>
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                                            <span class="text-gray-600">0-39: Needs Support</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                            <span class="text-gray-600">40-63: Developing</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                            <span class="text-gray-600">64+: Stable</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </CollapsibleContent>
-                    </Collapsible>
-                </Card>
-
-                <!-- Section 3: Where You'll Start - Phase Assignment -->
+                <!-- Section 4: Where You'll Start - Phase Assignment -->
                 <Card>
                     <CardHeader>
                         <CardTitle>Where You'll Start</CardTitle>
@@ -220,7 +162,7 @@
                     </CardContent>
                 </Card>
 
-                <!-- Section 4: What You'll Unlock -->
+                <!-- Section 5: What You'll Unlock -->
                 <Card>
                     <CardHeader>
                         <CardTitle>What You'll Unlock When oomo Opens</CardTitle>
@@ -258,13 +200,13 @@
                     </CardContent>
                 </Card>
 
-                <!-- Section 5: Save & Return CTA -->
+                <!-- Section 6: Save & Return CTA -->
                 <Card class="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                     <CardContent class="text-center p-8">
                         <h2 class="text-xl font-medium text-blue-900 pb-4">Save Your Score & Unlock Your Plan</h2>
                         <p class="text-blue-800 pb-6 max-w-2xl mx-auto">
-                            Your assessment is complete! Save your results and we'll let you know when oomo opens.
-                            Come back then to keep learning—with your own system as the textbook.
+                            Save your score, and we'll let you know when oomo opens. Come back then to keep
+                            learning—with your own system as the textbook.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
                             <Dialog v-model:open="showSaveDialog">
@@ -345,6 +287,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useAssessmentStore } from '~/stores/assessment'
 import type { DimensionKey, Phase } from '~/types/assessment'
+import { TERRAIN_SCORE_LABELS } from '~/types/assessment'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { Button } from '~/components/ui/button'
@@ -431,17 +374,22 @@ const getNextPhases = (currentPhase: string) => {
 }
 
 const getScoreRevealsMessage = (terrainScore: number): string => {
-    if (terrainScore >= 81) {
-        return "Your system is capable of receiving. This score reflects a terrain with strong signs of coherence, open exits, buffered charge, and stable rhythms. That doesn't guarantee everything is optimal — but it does suggest your body is ready to amplify healing, not resist it."
-    } else if (terrainScore >= 61) {
-        return "Your system is beginning to stabilize. This score reflects a terrain with improving coherence, charge, and flexibility — strong enough to take on more input, but not yet fully locked in. One or two systems may still wobble under stress."
-    } else if (terrainScore >= 41) {
-        return "You're close — but still blocked. This score reflects a system that has pieces in place, but one or more bottlenecks are still dragging down your overall readiness. That might be drainage, charge, override, or structural stuckness."
-    } else if (terrainScore >= 21) {
-        return "Your terrain is overloaded. This score shows your system is still working through some combination of congestion, rigidity, depletion, or timing misalignment. These create functional blockages — not just symptoms — that make it hard to adapt to even helpful inputs."
+    // Get the appropriate score label based on terrain score
+    let scoreLabel;
+    if (terrainScore >= 80) {
+        scoreLabel = TERRAIN_SCORE_LABELS["80-100"];
+    } else if (terrainScore >= 60) {
+        scoreLabel = TERRAIN_SCORE_LABELS["60-79"];
+    } else if (terrainScore >= 40) {
+        scoreLabel = TERRAIN_SCORE_LABELS["40-59"];
+    } else if (terrainScore >= 20) {
+        scoreLabel = TERRAIN_SCORE_LABELS["20-39"];
     } else {
-        return "Your body is protecting itself. This score reflects a system under significant internal strain. You may not feel terrible all the time — but at the cellular level, your terrain is likely stuck, congested, or collapsing under load."
+        scoreLabel = TERRAIN_SCORE_LABELS["0-19"];
     }
+
+    // Return the description which now contains the full detailed message
+    return scoreLabel.description;
 }
 
 const getCoherenceMessage = (coherenceScore: number): string => {
