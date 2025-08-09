@@ -287,7 +287,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useAssessmentStore } from '~/stores/assessment'
 import type { DimensionKey, Phase } from '~/types/assessment'
-import { TERRAIN_SCORE_LABELS } from '~/types/assessment'
+import { TERRAIN_SCORE_LABELS, COHERENCE_SCORE_LABELS } from '~/types/assessment'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { Button } from '~/components/ui/button'
@@ -312,21 +312,6 @@ const phaseInfo = computed(() => {
     }
     return null
 })
-
-// Methods
-const getDimensionName = (dimension: DimensionKey): string => {
-    const dimensionNames = {
-        D1: 'Exit Readiness',
-        D2: 'Mental Override',
-        D3: 'Oscillatory Capacity',
-        D4: 'Terrain Flexibility',
-        D5: 'Charge Reserve',
-        D6: 'Coherence Synchrony',
-        D7: 'Stuckness Pattern',
-        D8: 'Environmental Load'
-    }
-    return dimensionNames[dimension]
-}
 
 const getPhaseGatingDimensions = (phase: string): string => {
     switch (phase) {
@@ -393,17 +378,22 @@ const getScoreRevealsMessage = (terrainScore: number): string => {
 }
 
 const getCoherenceMessage = (coherenceScore: number): string => {
-    if (coherenceScore >= 81) {
-        return "Your system shows strong coherence patterns. This indicates good synchronization between your biological rhythms, stable energy flow, and coordinated system responses. Your body's internal communication networks are functioning well."
-    } else if (coherenceScore >= 61) {
-        return "Your coherence is developing well. This shows improving synchronization between systems, though some rhythms may still be finding their optimal patterns. Your body is learning to coordinate its responses more effectively."
-    } else if (coherenceScore >= 41) {
-        return "Your coherence shows mixed patterns. Some systems are synchronizing well while others may be out of rhythm. This suggests your body is working to establish better internal coordination and timing."
-    } else if (coherenceScore >= 21) {
-        return "Your coherence patterns need support. This indicates disrupted synchronization between biological systems, irregular rhythms, or poor internal communication. Your body may be struggling to coordinate its responses effectively."
+    // Get the appropriate coherence score label based on coherence score
+    let scoreLabel;
+    if (coherenceScore >= 80) {
+        scoreLabel = COHERENCE_SCORE_LABELS["80-100"];
+    } else if (coherenceScore >= 60) {
+        scoreLabel = COHERENCE_SCORE_LABELS["60-79"];
+    } else if (coherenceScore >= 40) {
+        scoreLabel = COHERENCE_SCORE_LABELS["40-59"];
+    } else if (coherenceScore >= 20) {
+        scoreLabel = COHERENCE_SCORE_LABELS["20-39"];
     } else {
-        return "Your coherence is significantly disrupted. This reflects major desynchronization between biological systems, chaotic rhythms, or breakdown in internal communication pathways. Your body's coordination systems need focused attention."
+        scoreLabel = COHERENCE_SCORE_LABELS["0-19"];
     }
+
+    // Return the description from the coherence score labels
+    return scoreLabel.description;
 }
 
 const getDimensionCardClass = (score: number): string => {
