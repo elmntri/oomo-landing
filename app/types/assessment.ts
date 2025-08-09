@@ -5,6 +5,7 @@ export interface Question {
   text: string;
   dimensions: DimensionKey[];
   isReverse: boolean;
+  type?: "likert" | "freeform"; // Optional type, defaults to "likert"
 }
 
 export interface AssessmentResponse {
@@ -55,7 +56,8 @@ export interface AssessmentState {
   startTime: Date | null;
 
   // Response data
-  responses: Map<number, number>;
+  responses: Map<number, number>; // For likert scale responses
+  freeformResponses: Map<number, string>; // For freeform responses
 
   // Calculated results
   results: AssessmentResults | null;

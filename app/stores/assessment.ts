@@ -171,6 +171,13 @@ const QUESTIONS: Question[] = [
     dimensions: ["D8"],
     isReverse: false,
   },
+  {
+    id: 26,
+    text: "Is there anything else you'd like to share about your current health, terrain, or healing history?",
+    dimensions: [], // No dimensions for freeform question
+    isReverse: false,
+    type: "freeform",
+  },
 ];
 
 export const useAssessmentStore = defineStore("assessment-store", {
@@ -179,6 +186,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
     isComplete: false,
     startTime: null,
     responses: new Map(),
+    freeformResponses: new Map(),
     results: null,
     isLoading: false,
     error: null,
@@ -204,6 +212,10 @@ export const useAssessmentStore = defineStore("assessment-store", {
 
     getPhaseInfo(): Record<Phase, PhaseInfo> {
       return PHASE_INFO;
+    },
+
+    isCurrentQuestionFreeform(): boolean {
+      return this.getCurrentQuestion.type === "freeform";
     },
   },
 
@@ -234,6 +246,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
       this.isComplete = false;
       this.startTime = new Date();
       this.responses.clear();
+      this.freeformResponses.clear();
       this.results = null;
       this.error = null;
       this.saveToStorage();
@@ -269,6 +282,20 @@ export const useAssessmentStore = defineStore("assessment-store", {
       return new Map(this.responses);
     },
 
+    // Freeform response management actions
+    setFreeformResponse(questionId: number, value: string) {
+      this.freeformResponses.set(questionId, value.trim());
+      this.saveToStorage();
+    },
+
+    getFreeformResponse(questionId: number): string | undefined {
+      return this.freeformResponses.get(questionId);
+    },
+
+    getAllFreeformResponses(): Map<number, string> {
+      return new Map(this.freeformResponses);
+    },
+
     // Scoring logic embedded in store
     calculateDimensionalScores(): DimensionalScores {
       const dimensionalScores: DimensionalScores = {
@@ -293,13 +320,17 @@ export const useAssessmentStore = defineStore("assessment-store", {
           const response = this.responses.get(qId);
           if (response !== undefined) {
             const question = QUESTIONS.find((q) => q.id === qId);
-            if (question) {
+            if (question && question.type !== "freeform") {
               // Apply reverse scoring if needed
               const score = question.isReverse ? 4 - response : response;
               totalScore += score;
             }
           }
-          maxPossible += 4; // Max score per question is 4
+          // Only count non-freeform questions toward max possible
+          const question = QUESTIONS.find((q) => q.id === qId);
+          if (question && question.type !== "freeform") {
+            maxPossible += 4; // Max score per question is 4
+          }
         }
 
         // Normalize to 100-point scale
@@ -516,16 +547,24 @@ export const useAssessmentStore = defineStore("assessment-store", {
 
     // Validation methods
     isQuestionAnswered(questionId: number): boolean {
+      const question = QUESTIONS.find((q) => q.id === questionId);
+      if (!question) return false;
+
+      if (question.type === "freeform") {
+        // Freeform questions are optional - always considered "answered"
+        return true;
+      }
       return this.responses.has(questionId);
     },
-
     areAllQuestionsAnswered(): boolean {
-      return QUESTIONS.every((question) => this.responses.has(question.id));
+      return QUESTIONS.every((question) =>
+        this.isQuestionAnswered(question.id)
+      );
     },
 
     getUnansweredQuestions(): number[] {
       return QUESTIONS.filter(
-        (question) => !this.responses.has(question.id)
+        (question) => !this.isQuestionAnswered(question.id)
       ).map((question) => question.id);
     },
 
@@ -548,6 +587,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
           isComplete: this.isComplete,
           startTime: this.startTime?.toISOString(),
           responses: Array.from(this.responses.entries()),
+          freeformResponses: Array.from(this.freeformResponses.entries()),
           results: this.results,
         };
         localStorage.setItem(
@@ -567,6 +607,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
             this.isComplete = state.isComplete || false;
             this.startTime = state.startTime ? new Date(state.startTime) : null;
             this.responses = new Map(state.responses || []);
+            this.freeformResponses = new Map(state.freeformResponses || []);
             this.results = state.results || null;
           } catch (error) {
             console.error(
@@ -584,6 +625,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
       this.isComplete = false;
       this.startTime = null;
       this.responses.clear();
+      this.freeformResponses.clear();
       this.results = null;
       this.isLoading = false;
       this.error = null;
@@ -613,7 +655,10 @@ export const useAssessmentStore = defineStore("assessment-store", {
             },
             body: JSON.stringify({
               email,
-              content: JSON.stringify(this.results),
+              content: JSON.stringify({
+                ...this.results,
+                freeformResponses: Object.fromEntries(this.freeformResponses),
+              }),
             }),
           }
         );

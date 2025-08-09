@@ -41,8 +41,8 @@
                         </h2>
                     </div>
 
-                    <!-- Choices Section - Consistent Layout -->
-                    <div class="space-y-3">
+                    <!-- Choices Section - Dynamic Layout -->
+                    <div v-if="!assessmentStore.isCurrentQuestionFreeform" class="space-y-3">
                         <button v-for="(option, index) in likertOptions" :key="index" @click="handleAnswer(index)"
                             class="w-full px-4 py-2 lg:px-4 lg:py-4 text-left border-2 rounded-md transition-all"
                             :class="getOptionClasses(index)">
@@ -52,6 +52,17 @@
                                     class="w-5 h-5 text-blue-600" />
                             </div>
                         </button>
+                    </div>
+
+                    <!-- Freeform Text Area -->
+                    <div v-else class="space-y-4">
+                        <textarea v-model="freeformAnswer" @input="handleFreeformInput"
+                            placeholder="Please share any additional thoughts or details that might be helpful..."
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-md focus:border-blue-500 focus:ring-0 focus:outline-none resize-none transition-all"
+                            rows="6" />
+                        <p class="text-xs text-gray-500">
+                            This field is optional - you can leave it blank and continue.
+                        </p>
                     </div>
                 </div>
             </Transition>
@@ -75,11 +86,17 @@
                 </button>
 
                 <div class="text-sm lg:text-base text-gray-500 text-center">
-                    Select an answer to continue
+                    <span v-if="assessmentStore.isCurrentQuestionFreeform">
+                        Optional - continue when ready
+                    </span>
+                    <span v-else>
+                        Select an answer to continue
+                    </span>
                 </div>
 
-                <button @click="goToNext" :disabled="selectedAnswer === null"
-                    class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="selectedAnswer === null
+                <button @click="goToNext"
+                    :disabled="!assessmentStore.isCurrentQuestionFreeform && selectedAnswer === null"
+                    class="flex items-center space-x-2 px-4 py-2 rounded-md transition-colors" :class="(!assessmentStore.isCurrentQuestionFreeform && selectedAnswer === null)
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-800 hover:text-gray-900 hover:bg-gray-100'">
                     <Icon name="lucide:arrow-right" class="w-4 h-4" />
@@ -97,6 +114,7 @@ import { LIKERT_OPTIONS } from '~/types/assessment'
 // Store and reactive data
 const assessmentStore = useAssessmentStore()
 const selectedAnswer = ref<number | null>(null)
+const freeformAnswer = ref<string>('')
 const autoAdvanceTimeout = ref<NodeJS.Timeout | null>(null)
 
 // Computed properties
@@ -111,7 +129,9 @@ const timeRemaining = computed(() => {
 })
 
 const answeredCount = computed(() => {
-    return assessmentStore.getAllResponses().size
+    const likertCount = assessmentStore.getAllResponses().size
+    const freeformCount = assessmentStore.getAllFreeformResponses().size
+    return likertCount + freeformCount
 })
 
 // Methods
@@ -144,8 +164,20 @@ const handleAnswer = (answerIndex: number) => {
     }, 300)
 }
 
+const handleFreeformInput = () => {
+    // Save freeform response to store
+    assessmentStore.setFreeformResponse(currentQuestion.value.id, freeformAnswer.value)
+
+    // Clear any error messages when typing
+    if (assessmentStore.error) {
+        assessmentStore.error = null
+    }
+}
+
 const goToNext = () => {
-    if (selectedAnswer.value !== null) {
+    const canAdvance = assessmentStore.isCurrentQuestionFreeform || selectedAnswer.value !== null
+
+    if (canAdvance) {
         // Clear timeout if manually advancing
         if (autoAdvanceTimeout.value) {
             clearTimeout(autoAdvanceTimeout.value)
@@ -188,9 +220,17 @@ const goToPrevious = () => {
 
 // Watch for question changes to update selected answer
 watch(() => assessmentStore.currentQuestion, () => {
-    // Load existing response for this question
-    const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
-    selectedAnswer.value = existingResponse !== undefined ? existingResponse : null
+    if (assessmentStore.isCurrentQuestionFreeform) {
+        // Load existing freeform response for this question
+        const existingFreeformResponse = assessmentStore.getFreeformResponse(currentQuestion.value.id)
+        freeformAnswer.value = existingFreeformResponse || ''
+        selectedAnswer.value = null
+    } else {
+        // Load existing likert response for this question
+        const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
+        selectedAnswer.value = existingResponse !== undefined ? existingResponse : null
+        freeformAnswer.value = ''
+    }
 
     // Clear any pending auto-advance
     if (autoAdvanceTimeout.value) {
@@ -216,8 +256,15 @@ onMounted(() => {
     }
 
     // Load existing response for current question
-    const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
-    selectedAnswer.value = existingResponse !== undefined ? existingResponse : null
+    if (assessmentStore.isCurrentQuestionFreeform) {
+        const existingFreeformResponse = assessmentStore.getFreeformResponse(currentQuestion.value.id)
+        freeformAnswer.value = existingFreeformResponse || ''
+        selectedAnswer.value = null
+    } else {
+        const existingResponse = assessmentStore.getResponse(currentQuestion.value.id)
+        selectedAnswer.value = existingResponse !== undefined ? existingResponse : null
+        freeformAnswer.value = ''
+    }
 
     // Start assessment if not already started
     if (!assessmentStore.startTime) {
