@@ -658,6 +658,7 @@ export const useAssessmentStore = defineStore("assessment-store", {
               email,
               content: JSON.stringify({
                 ...this.results,
+                responses: Object.fromEntries(this.responses),
                 freeformResponses: Object.fromEntries(this.freeformResponses),
               }),
             }),

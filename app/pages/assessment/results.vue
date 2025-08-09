@@ -281,6 +281,7 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 
 // Store and reactive data
+const showToast = useShowToast()
 const assessmentStore = useAssessmentStore()
 const showDimensionalScores = ref(false)
 const showCoherenceDetails = ref(false)
@@ -392,25 +393,6 @@ const getDimensionCardClass = (score: number): string => {
     }
 }
 
-const getDimensionScoreClass = (score: number): string => {
-    if (score > 63) {
-        return 'text-green-700'
-    } else if (score >= 40) {
-        return 'text-yellow-700'
-    } else {
-        return 'text-red-700'
-    }
-}
-
-const getDimensionBarClass = (score: number): string => {
-    if (score > 63) {
-        return 'bg-green-400'
-    } else if (score >= 40) {
-        return 'bg-yellow-400'
-    } else {
-        return 'bg-red-400'
-    }
-}
 
 const validateEmail = (emailValue: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -447,8 +429,10 @@ const handleSaveResults = async () => {
 
         if (success) {
             showSaveDialog.value = false
-            // You could show a success toast here instead of alert
-            alert('Results saved successfully! We\'ll notify you when oomo opens.')
+            showToast({
+                title: 'Results Saved',
+                description: 'Your assessment results have been saved successfully. You will be notified when oomo opens.',
+            })
         } else {
             emailError.value = "Failed to save your results. Try again or contact support if issue persists"
         }
